@@ -15,10 +15,29 @@ from driver.decorators import authorized_users_only, sudo_users_only
 async def join_chat(c: Client, m: Message):
     chat_id = m.chat.id
     try:
-        invitelink = await c.export_chat_invite_link(chat_id)
-        if invitelink.startswith("https://t.me/+"):
-            invitelink = invitelink.replace(
-                "https://t.me/+", "https://t.me/joinchat/"
+        ubot = (await user.get_me()).id
+        b = await c.get_chat_member(chat_id, ubot) 
+        if b.status == "kicked":
+            await c.unban_chat_member(chat_id, ubot)
+            invitelink = await c.export_chat_invite_link(chat_id)
+            if invitelink.startswith("https://t.me/+"):
+                    invitelink = invitelink.replace(
+                        "https://t.me/+", "https://t.me/joinchat/"
+                    )
+            await user.join_chat(invitelink)
+    except UserNotParticipant:
+        try:
+            invitelink = await c.export_chat_invite_link(chat_id)
+            if invitelink.startswith("https://t.me/+"):
+                    invitelink = invitelink.replace(
+                        "https://t.me/+", "https://t.me/joinchat/"
+                    )
+            await user.join_chat(invitelink)
+        except UserAlreadyParticipant:
+            pass
+        except Exception as e:
+            return await m.reply_text(
+                f"❌ **فشل في الانضمام**\n\n**السبب**: `{e}`"
             )
             await user.join_chat(invitelink)
             await user.send_message(chat_id, "✅ انضم الحساب المساعد بنجاح")
