@@ -53,7 +53,7 @@ async def _human_time_duration(seconds):
 )
 async def start_(client: Client, message: Message):
     await message.reply_text(
-        f"""📮╎ مرحبا بك عزيزي [{query.message.chat.first_name}](tg://user?id={query.message.chat.id}) !**\n
+        f"""{message.from_user.mention()} 📮╎ مرحبا بك عزيزي\n
 🎧╎انا بوت تشغيل الفديو و الموسيقى في الدردشات الصوتيه.
 
 📥╎استطيع ايضا التحمل من اليوتيوب فديو او صوت بجميع الدقق.
