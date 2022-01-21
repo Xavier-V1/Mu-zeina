@@ -2,12 +2,10 @@
 
 from __future__ import unicode_literals
 
-import os
-import re
-import math
-import time
 import asyncio
-import lyricsgenius
+import math
+import os
+import time
 from random import randint
 from urllib.parse import urlparse
 
@@ -20,7 +18,6 @@ from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.types import Message
 from youtube_search import YoutubeSearch
-from youtubesearchpython import VideosSearch
 from yt_dlp import YoutubeDL
 
 from config import BOT_USERNAME as bn
@@ -41,7 +38,7 @@ ydl_opts = {
 @Client.on_message(command(["song", f"song@{bn}"]) & ~filters.edited)
 def song(_, message):
     query = " ".join(message.command[1:])
-    m = message.reply("🔎 finding song...")
+    m = message.reply("🔎 يـتم الـبحث...")
     ydl_ops = {"format": "bestaudio[ext=m4a]"}
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -54,21 +51,21 @@ def song(_, message):
         duration = results[0]["duration"]
 
     except Exception as e:
-        m.edit("❌ song not found.\n\nplease give a valid song name.")
+        m.edit("❌ لم يتم العثور على الأغنية. \n \n الرجاء إعطاء اسم أغنية صالح")
         print(str(e))
         return
-    m.edit("📥 downloading file...")
+    m.edit("📥 يـتم الـتحمـيل...")
     try:
         with yt_dlp.YoutubeDL(ydl_ops) as ydl:
             info_dict = ydl.extract_info(link, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
-        rep = f"**🎧 Uploader @{bn}**"
+        rep = f"**🎧 بــواسـطه @{bn}**"
         secmul, dur, dur_arr = 1, 0, duration.split(":")
         for i in range(len(dur_arr) - 1, -1, -1):
             dur += int(float(dur_arr[i])) * secmul
             secmul *= 60
-        m.edit("📤 uploading file...")
+        m.edit("📤 يـتم الـرفع...")
         message.reply_audio(
             audio_file,
             caption=rep,
@@ -79,7 +76,7 @@ def song(_, message):
         )
         m.delete()
     except Exception as e:
-        m.edit("❌ error, wait for bot owner to fix")
+        m.edit("❌ خطأ ، انتظر حتى يصلح مالك البوت")
         print(e)
 
     try:
@@ -117,14 +114,14 @@ async def vsong(client, message):
     except Exception as e:
         print(e)
     try:
-        msg = await message.reply("📥 **downloading video...**")
+        msg = await message.reply("📥 **يـتم تحـميل الـفيـديو...**")
         with YoutubeDL(ydl_opts) as ytdl:
             ytdl_data = ytdl.extract_info(link, download=True)
             file_name = ytdl.prepare_filename(ytdl_data)
     except Exception as e:
-        return await msg.edit(f"🚫 **error:** {e}")
+        return await msg.edit(f"🚫 **خـطا:** {e}")
     preview = wget.download(thumbnail)
-    await msg.edit("📤 **uploading video...**")
+    await msg.edit("📤 **يـتم رفع الـفيـديو...**")
     await message.reply_video(
         file_name,
         duration=int(ytdl_data["duration"]),
@@ -138,33 +135,18 @@ async def vsong(client, message):
         print(e)
 
 
-@Client.on_message(command(["lyric", f"lyric@{bn}", "lyrics"]))
-async def get_lyric_genius(_, message: Message):
-    if len(message.command) < 2:
-        return await message.reply_text("**usage:**\n\n/lyrics (song name)")
-    m = await message.reply_text("🔍 Searching lyrics...")
-    query = message.text.split(None, 1)[1]
-    x = "OXaVabSRKQLqwpiYOn-E4Y7k3wj-TNdL5RfDPXlnXhCErbcqVvdCF-WnMR5TBctI"
-    y = lyricsgenius.Genius(x)
-    y.verbose = False
-    S = y.search_song(query, get_full_info=False)
-    if S is None:
-        return await m.edit("❌ `404` lyrics not found")
-    xxx = f"""
-**Song Name:** __{query}__
-**Artist Name:** {S.artist}
-**__Lyrics:__**
-{S.lyrics}"""
-    if len(xxx) > 4096:
-        await m.delete()
-        filename = "lyrics.txt"
-        with open(filename, "w+", encoding="utf8") as out_file:
-            out_file.write(str(xxx.strip()))
-        await message.reply_document(
-            document=filename,
-            caption=f"**OUTPUT:**\n\n`Lyrics Text`",
-            quote=False,
-        )
-        os.remove(filename)
-    else:
-        await m.edit(xxx)
+@Client.on_message(command(["lyric", f"lyric@{bn}"]))
+async def lyrics(_, message):
+    try:
+        if len(message.command) < 2:
+            await message.reply_text("» **إعطاء اسم اغنيه أيضا.**")
+            return
+        query = message.text.split(None, 1)[1]
+        rep = await message.reply_text("🔎 **يـتم البـحث عن الـكلمات...**")
+        resp = requests.get(
+            f"https://api-tede.herokuapp.com/api/lirik?l={query}"
+        ).json()
+        result = f"{resp['data']}"
+        await rep.edit(result)
+    except Exception:
+        await rep.edit("❌ لم يتم العثور على نتائج كلمات الأغنية. \n \n »** يرجى إعطاء اسم أغنية صالح.")
