@@ -15,7 +15,7 @@ from driver.filters import command, other_filters
 
 
 keyboard = InlineKeyboardMarkup(
-    [[InlineKeyboardButton("🗑 Close", callback_data="cls")]]
+    [[InlineKeyboardButton("🗑 اغلاق", callback_data="cls")]]
 )
 
 
@@ -27,7 +27,7 @@ async def playlist(client, m: Message):
       if len(chat_queue)==1:
          await m.reply(f"💡 **Currently Streaming:**\n\n• [{chat_queue[0][0]}]({chat_queue[0][2]}) | `{chat_queue[0][3]}`", reply_markup=keyboard, disable_web_page_preview=True)
       else:
-         QUE = f"💡 **يـتم الـبث حاليا:**\n\n• [{chat_queue[0][0]}]({chat_queue[0][2]}) | `{chat_queue[0][3]}` \n\n**📖 Queue List:**\n"
+         QUE = f"💡 **Currently Streaming:**\n\n• [{chat_queue[0][0]}]({chat_queue[0][2]}) | `{chat_queue[0][3]}` \n\n**📖 Queue List:**\n"
          l = len(chat_queue)
          for x in range (1, l):
             han = chat_queue[x][0]
@@ -36,4 +36,4 @@ async def playlist(client, m: Message):
             QUE = QUE + "\n" + f"**#{x}** - [{han}]({hok}) | `{hap}`"
          await m.reply(QUE, reply_markup=keyboard, disable_web_page_preview=True)
    else:
-      await m.reply("❌ لا يــتـم تـشـغيـل شئ حـالـيا")
+      await m.reply("❌ **لا يتم تشغيل شئ حاليا.**")
